@@ -32,7 +32,7 @@ export const Answer = ({ data }: Props) => (
         color: ${gray3};
       `}
     >
-      {`Asked by ${data.userName} on
+      {`Answered by ${data.userName} on
         ${data.created.toLocaleDateString()}
         ${data.created.toLocaleTimeString()}`}
     </div>

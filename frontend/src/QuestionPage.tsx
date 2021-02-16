@@ -1,17 +1,35 @@
 /** @jsxImportSource @emotion/react */
 
 import { css } from '@emotion/react';
-import { gray3, gray6 } from './Styles';
+import {
+  gray3,
+  gray6,
+  Fieldset,
+  FieldContainer,
+  FieldLabel,
+  FieldTextArea,
+  FormButtonContainer,
+  PrimaryButton,
+  FieldError,
+  SubmissionSuccess,
+} from './Styles';
+
+import { FormProvider, useForm } from 'react-hook-form';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { Page } from './Page';
-import { getQuestion, QuestionData } from './QuestionsData';
+import { getQuestion, postAnswer, QuestionData } from './QuestionsData';
 import { AnswerList } from './AnswerList';
 import { QuestionList } from './QuestionList';
 
+type FormData = { content: string };
+
 export const QuestionPage = () => {
+  const [successfullySubmitted, setSuccessfullySubmitted] = React.useState(
+    false,
+  );
   const [question, setQuestion] = React.useState<QuestionData | null>(null);
 
   const { questionId } = useParams();
@@ -25,6 +43,20 @@ export const QuestionPage = () => {
       doGetQuestion(Number(questionId));
     }
   }, [questionId]);
+
+  const { register, errors, handleSubmit, formState } = useForm<FormData>({
+    mode: 'onBlur',
+  });
+
+  const submitForm = async (data: FormData) => {
+    const result = await postAnswer({
+      questionId: question!.questionId,
+      content: data.content,
+      userName: 'Fred',
+      created: new Date(),
+    });
+    setSuccessfullySubmitted(result ? true : false);
+  };
 
   return (
     <Page>
@@ -69,6 +101,43 @@ export const QuestionPage = () => {
               `}
             </div>
             <AnswerList data={question.answers} />
+            <form
+              onSubmit={handleSubmit(submitForm)}
+              css={css`
+                margin-top: 20px;
+              `}
+            >
+              <Fieldset
+                disabled={formState.isSubmitting || successfullySubmitted}
+              >
+                <FieldContainer>
+                  <FieldLabel htmlFor="content">Your Answer</FieldLabel>
+                  <FieldTextArea
+                    id="content"
+                    name="content"
+                    ref={register({ required: true, minLength: 50 })}
+                  ></FieldTextArea>
+                  {errors.content && errors.content.type === 'required' && (
+                    <FieldError>You must enter the answer</FieldError>
+                  )}
+                  {errors.content && errors.content.type === 'minLength' && (
+                    <FieldError>
+                      The answer must be at least 50 characters
+                    </FieldError>
+                  )}
+                </FieldContainer>
+                <FormButtonContainer>
+                  <PrimaryButton type="submit">
+                    Submit Your Answer
+                  </PrimaryButton>
+                </FormButtonContainer>
+                {successfullySubmitted && (
+                  <SubmissionSuccess>
+                    Your answer was successfully submitted
+                  </SubmissionSuccess>
+                )}
+              </Fieldset>
+            </form>
           </React.Fragment>
         )}
       </div>
