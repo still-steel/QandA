@@ -95,7 +95,7 @@ namespace QandA.Data
 			}
 		}
 
-		public AnswerGetResponse PostAnswer(AnswerPostRequest answer)
+		public AnswerGetResponse PostAnswer(AnswerPostFullRequest answer)
 		{
 			using (var connection = new SqlConnection(_connectionString))
 			{
@@ -108,7 +108,7 @@ namespace QandA.Data
 			}
 		}
 
-		public QuestionGetSingleResponse PostQuestion(QuestionPostRequest question)
+		public QuestionGetSingleResponse PostQuestion(QuestionPostFullRequest question)
 		{
 			using (var connection = new SqlConnection(_connectionString))
 			{
@@ -132,7 +132,7 @@ namespace QandA.Data
 			{
 				connection.Open();
 				connection.Execute(
-					@"EXEC dbo.Question_Put @QuestionId = @QuestionId, @Content = @Content",
+					@"EXEC dbo.Question_Put @QuestionId = @QuestionId, @Title = @Title, @Content = @Content",
 					new { QuestionId = questionId, question.Title, question.Content });
 				return GetQuestion(questionId);
 			}
