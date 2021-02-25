@@ -13,6 +13,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using QandA.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
+using QandA.Authorization;
 
 namespace QandA
 {
@@ -49,10 +53,33 @@ namespace QandA
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "QandA", Version = "v1" });
 			});
 
+			services.AddAuthentication(options =>
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			}).AddJwtBearer(options =>
+			{
+				options.Authority = Configuration["Auth0:Authority"];
+				options.Audience = Configuration["Auth0:Audience"];
+			});
+			services.AddHttpClient();
+			services.AddAuthorization(options =>
+				options.AddPolicy("MustBeQuestionAuthor", policy =>
+					policy.Requirements
+						.Add(new MustBeQuestionAuthorRequirement())));
+			services.AddScoped<IAuthorizationHandler, MustBeQuestionAuthorHandler>();
+			services.AddHttpContextAccessor();
+
+			services.AddCors(options =>
+				options.AddPolicy("CorsPolicy", builder =>
+					builder
+						.AllowAnyMethod()
+						.AllowAnyHeader()
+						.WithOrigins(Configuration["Frontend"])));
+
 			services.AddScoped<IDataRepository, DataRepository>();
 
 			services.AddMemoryCache();
-
 			services.AddSingleton<IQuestionCache, QuestionCache>();
 		}
 
@@ -69,6 +96,10 @@ namespace QandA
 			app.UseHttpsRedirection();
 
 			app.UseRouting();
+
+			app.UseCors("CorsPolicy");
+
+			app.UseAuthentication();
 
 			app.UseAuthorization();
 
