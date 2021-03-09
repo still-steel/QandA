@@ -48,15 +48,15 @@ namespace QandA.Data
 			{
 				await connection.OpenAsync();
 
-				using (var results = await connection.QueryMultipleAsync(
+				using (GridReader results = await connection.QueryMultipleAsync(
 					@"EXEC dbo.Question_GetSingle @QuestionId = @QuestionId;
 					EXEC dbo.Answer_Get_ByQuestionId @QuestionId = @QuestionId", new { QuestionId = questionId }))
 				{
-					var question = results.Read<QuestionGetSingleResponse>().FirstOrDefault();
+					var question = ( await results.ReadAsync<QuestionGetSingleResponse>()).FirstOrDefault();
 
 					if (question != null)
 					{
-						question.Answers = results.Read<AnswerGetResponse>().ToList();
+						question.Answers = ( await results.ReadAsync<AnswerGetResponse>()).ToList();
 					}
 					return question;
 				}
@@ -80,7 +80,7 @@ namespace QandA.Data
 				await connection.OpenAsync();
 
 				var questionDictionary = new Dictionary<int, QuestionGetManyResponse>();
-				return connection.Query<QuestionGetManyResponse, AnswerGetResponse, QuestionGetManyResponse>(
+				return ( await connection.QueryAsync<QuestionGetManyResponse, AnswerGetResponse, QuestionGetManyResponse>(
 					"EXEC dbo.Question_GetMany_WithAnswers", map: (q, a) =>
 					{
 						QuestionGetManyResponse question;
@@ -93,7 +93,7 @@ namespace QandA.Data
 						question.Answers.Add(a);
 						return question;
 					},
-					splitOn: "QuestionId")
+					splitOn: "QuestionId"))
 					.Distinct()
 					.ToList();
 			}

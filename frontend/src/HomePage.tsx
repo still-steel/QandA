@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { QuestionList } from './QuestionList';
 import { getUnansweredQuestions } from './QuestionsData';
 import { Page } from './Page';
@@ -13,7 +13,7 @@ import {
   gotUnansweredQuestionsAction,
   AppState,
 } from './Store';
-
+import { useAuth } from './Auth';
 export const HomePage = () => {
   const dispatch = useDispatch();
   const questions = useSelector(
@@ -25,13 +25,18 @@ export const HomePage = () => {
   );
 
   React.useEffect(() => {
+    let cancelled = false;
     const doGetUnansweredQuestions = async () => {
       dispatch(gettingUnansweredQuestionsAction());
       const unansweredQuestions = await getUnansweredQuestions();
-      dispatch(gotUnansweredQuestionsAction(unansweredQuestions));
+      if (!cancelled) {
+        dispatch(gotUnansweredQuestionsAction(unansweredQuestions));
+      }
     };
     doGetUnansweredQuestions();
-
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -40,6 +45,8 @@ export const HomePage = () => {
   const handleAskQuestionClick = () => {
     navigate('ask');
   };
+
+  const { isAuthenticated } = useAuth();
 
   return (
     <Page>
@@ -51,9 +58,11 @@ export const HomePage = () => {
         `}
       >
         <PageTitle>Unanswered Questions</PageTitle>
-        <PrimaryButton onClick={handleAskQuestionClick}>
-          Ask a question
-        </PrimaryButton>
+        {isAuthenticated && (
+          <PrimaryButton onClick={handleAskQuestionClick}>
+            Ask a question
+          </PrimaryButton>
+        )}
       </div>
       {questionsLoading ? (
         <div>Loading...</div>

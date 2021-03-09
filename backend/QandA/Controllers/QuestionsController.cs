@@ -149,7 +149,7 @@ namespace QandA.Controllers
 			{
 				QuestionId = answerPostRequest.QuestionId.Value,
 				Content = answerPostRequest.Content,
-				UserId = User.FindFirst(ClaimTypes.Name).Value,
+				UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
 				UserName = await GetUserName(),
 				Created = DateTime.UtcNow
 			});
