@@ -87,7 +87,6 @@ export const searchQuestions = async (
 export interface PostQuestionData {
   title: string;
   content: string;
-  userName: string;
   created: Date;
 }
 
@@ -112,7 +111,6 @@ export const postQuestion = async (
 export interface PostAnswerData {
   questionId: number;
   content: string;
-  userName: string;
   created: Date;
 }
 

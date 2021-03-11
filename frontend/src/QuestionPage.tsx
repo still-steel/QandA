@@ -68,7 +68,6 @@ export const QuestionPage = () => {
     const result = await postAnswer({
       questionId: question!.questionId,
       content: data.content,
-      userName: 'Fred',
       created: new Date(),
     });
     setSuccessfullySubmitted(result ? true : false);

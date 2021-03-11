@@ -26,6 +26,7 @@ export const HomePage = () => {
 
   React.useEffect(() => {
     let cancelled = false;
+
     const doGetUnansweredQuestions = async () => {
       dispatch(gettingUnansweredQuestionsAction());
       const unansweredQuestions = await getUnansweredQuestions();
@@ -34,6 +35,7 @@ export const HomePage = () => {
       }
     };
     doGetUnansweredQuestions();
+
     return () => {
       cancelled = true;
     };
