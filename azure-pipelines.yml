@@ -1,0 +1,95 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '5.0.201'
+- script: dotnet build --configuration $(buildConfiguration)
+  workingDirectory: backend/QandA
+  displayName: 'backend build'
+- script: dotnet test 
+  workingDirectory: backend/BackendTests
+  displayName: backend tests
+- script: dotnet publish -c $(buildConfiguration) -r win-x86 --self-contained true 
+  workingDirectory: backend/QandA
+  displayName: backend publish
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'backend/QandA/bin/release/net5.0/win-x86/publish'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/backend/QandA/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+  displayName: 'backend zip files'
+- task: PublishBuildArtifacts@1
+  inputs: 
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/backend/QandA'
+    ArtifactName: 'backend'
+  displayName: 'backend publish to pipeline'
+
+- script: npm install 
+  workingDirectory: frontend
+  displayName: 'frontend install dependencies'
+
+- script: npm run test:ci
+  workingDirectory: frontend
+  displayName: 'fronend tests'
+
+- script: npm run build:staging
+  workingDirectory: frontend
+  displayName: 'frontend staging build'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'frontend/build'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/frontend-staging/build.zip'
+    replaceExistingArchive: true
+  displayName: 'frontend staging zip files'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'frontend/cypress'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/frontend-staging/tests.zip'
+    replaceExistingArchive: true
+  displayName: 'frontend staging zip files'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+   PathtoPublish: '$(Build.ArtifactsStagingDirectory)/frontend-staging'
+   artifactName: 'frontend-staging'
+  displayName: 'fronend staging publish to pipeline'
+
+- script: npm run build:production
+  workingDirectory: frontend
+  displayName: 'frontend production build'
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'frontend/build'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/frontend-production/build.zip'
+    replaceExistingArchive: true
+  displayName: 'frontend production zip files'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+   PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend-production'
+   artifactName: 'frontend-production'
+  displayName: 'frontend production publish to pipeline'
