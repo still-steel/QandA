@@ -28,7 +28,7 @@ steps:
   displayName: backend publish
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: 'backend/QandA/bin/release/net5.0/win-x86/publish'
+    rootFolderOrFile: 'backend/QandA/bin/Release/net5.0/win-x86/publish'
     includeRootFolder: false
     archiveType: zip
     archiveFile: '$(Build.ArtifactStagingDirectory)/backend/QandA/$(Build.BuildId).zip'
@@ -72,7 +72,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-   PathtoPublish: '$(Build.ArtifactsStagingDirectory)/frontend-staging'
+   PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend-staging'
    artifactName: 'frontend-staging'
   displayName: 'fronend staging publish to pipeline'
 
