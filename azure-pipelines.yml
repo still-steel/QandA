@@ -72,7 +72,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-   PathtoPublish: '$(Build.ArtifactsStagingDirectory)/frontend-staging'
+   PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend-staging'
    artifactName: 'frontend-staging'
   displayName: 'fronend staging publish to pipeline'
 
