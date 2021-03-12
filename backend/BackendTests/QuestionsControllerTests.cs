@@ -12,7 +12,7 @@ using QandA.Data;
 using QandA.Data.Models;
 
 
-namespace BackendTestsm
+namespace BackendTests
 {
 	public class QuestionsControllerTests
 	{
